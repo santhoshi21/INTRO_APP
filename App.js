@@ -26,8 +26,8 @@ const Home = ({ navigation, isDarkMode, toggleTheme }) => {
   const cardData = [
     { title: 'About Me', screen: 'AboutMe' },
     { title: 'Projects', screen: 'Projects' },
-    { title: 'Certifications', screen: 'Certifications' },
-    { title: 'Interests', screen: 'Interests' },
+    { title: 'Work Experience', screen: 'Certifications' },
+    { title: 'Certifications', screen: 'Interests' },
     { title: 'Contact', screen: 'Contact' },
   ];
 
@@ -35,28 +35,32 @@ const Home = ({ navigation, isDarkMode, toggleTheme }) => {
   const [text, setText] = useState('');
   const fullText = "Welcome to Santhoshi's Portfolio";  // Updated text
   const [isTypingDone, setIsTypingDone] = useState(false); // To track whether typing animation has finished
+  const [hasAnimated, setHasAnimated] = useState(false); // Track if animation has run
 
   // Typewriter animation for text
   useEffect(() => {
-    let index = 0;
+    if (!hasAnimated) {  // Only run the animation if it hasn't already run
+      let index = 0;
 
-    const interval = setInterval(() => {
-      setText(prev => {
-        if (index < fullText.length) {
-          index += 1;
-          return prev + fullText[index - 1]; // Add one character at a time
+      const interval = setInterval(() => {
+        setText(prev => {
+          if (index < fullText.length) {
+            index += 1;
+            return prev + fullText[index - 1]; // Add one character at a time
+          }
+          return prev; // Don't update text once all characters are typed
+        });
+
+        if (index === fullText.length) {
+          clearInterval(interval);
+          setIsTypingDone(true); // Mark typing as done once the text is fully displayed
+          setHasAnimated(true); // Mark animation as complete
         }
-        return prev; // Don't update text once all characters are typed
-      });
-      
-      if (index === fullText.length) {
-        clearInterval(interval);
-        setIsTypingDone(true); // Mark typing as done once the text is fully displayed
-      }
-    }, 150);  // Adjust the speed of the typing effect by changing the interval
+      }, 150);  // Adjust the speed of the typing effect by changing the interval
 
-    return () => clearInterval(interval); // Cleanup interval on component unmount
-  }, []); // Empty dependency array ensures this runs once on mount
+      return () => clearInterval(interval); // Cleanup interval on component unmount
+    }
+  }, [hasAnimated]); // Add hasAnimated as a dependency so it doesn't restart
 
   const handlePressIn = () => {
     Animated.spring(scale, {
@@ -141,9 +145,8 @@ export default function App() {
           {props => <AboutMe {...props} />}
         </Stack.Screen>
         <Stack.Screen name="Projects">
-  {props => <Projects {...props} isDarkMode={isDarkMode} />}
-</Stack.Screen>
-
+          {props => <Projects {...props} />}
+        </Stack.Screen>
         <Stack.Screen name="Certifications">
           {props => <Certifications {...props} />}
         </Stack.Screen>
