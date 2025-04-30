@@ -27,8 +27,8 @@ const Home = ({ navigation, isDarkMode, toggleTheme }) => {
     { title: 'About Me', screen: 'AboutMe' },
     { title: 'Projects', screen: 'Projects' },
     { title: 'Work Experience', screen: 'Certifications' },
-    { title: 'Certif', screen: 'Interests' },
-    { title: 'Contact', screen: 'Contact' },
+    { title: 'Certifcations', screen: 'Interests' },
+    { title: 'Contact Information', screen: 'Contact' },
   ];
 
   const [scale, setScale] = useState(new Animated.Value(1));
@@ -151,9 +151,11 @@ export default function App() {
 <Stack.Screen name="Certifications">
   {props => <Certifications {...props} isDarkMode={isDarkMode} />}
 </Stack.Screen>
-        <Stack.Screen name="Interests">
-          {props => <Interests {...props} />}
-        </Stack.Screen>
+<Stack.Screen name="Interests">
+  {props => <Interests {...props} isDarkMode={isDarkMode} />}
+</Stack.Screen>
+
+        
         <Stack.Screen name="Contact">
           {props => <Contact {...props} />}
         </Stack.Screen>

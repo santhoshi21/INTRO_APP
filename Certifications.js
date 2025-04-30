@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { SafeAreaView, View, Text, StyleSheet, TouchableOpacity, ScrollView, Animated } from 'react-native';
+import { SafeAreaView, View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 
 const Certifications = ({ isDarkMode }) => {
   // State to manage which section is expanded
@@ -18,6 +18,15 @@ const Certifications = ({ isDarkMode }) => {
         </TouchableOpacity>
         {expandedWorkExperience && (
           <ScrollView style={styles.sectionContent}>
+            {/* Work Experience Intro */}
+            <View style={[styles.card, { backgroundColor: isDarkMode ? '#333' : '#fff' }]}>
+              <Text style={[styles.cardTitle, { color: isDarkMode ? '#fff' : '#333' }]}>Work Experience at International Institute of Information Technology, Hyderabad</Text>
+              <Text style={[styles.cardDescription, { color: isDarkMode ? '#ccc' : '#555' }]}>
+                Duration: April 2023 - January 2024
+              </Text>
+            </View>
+
+            {/* Existing Work Experience Cards */}
             <View style={[styles.card, { backgroundColor: isDarkMode ? '#333' : '#fff' }]}>
               <Text style={[styles.cardTitle, { color: isDarkMode ? '#fff' : '#333' }]}>Messenger Application</Text>
               <Text style={[styles.cardDescription, { color: isDarkMode ? '#ccc' : '#555' }]}>
