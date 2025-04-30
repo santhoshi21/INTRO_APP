@@ -1,88 +1,157 @@
-import React, { useState } from 'react';
-import { Text, View, StyleSheet, SafeAreaView, TouchableOpacity, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  SafeAreaView,
+  View,
+  Text,
+  StyleSheet,
+  Switch,
+  TouchableOpacity,
+  ScrollView,
+  Animated,
+} from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import AboutMeScreen from './AboutMeScreen';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-// Screen 1: Welcome Screen
-const WelcomeScreen = ({ navigation, toggleTheme, isDarkMode }) => (
-  <SafeAreaView style={[styles.container, isDarkMode ? styles.darkContainer : styles.lightContainer]}>
-    <Text style={[styles.welcomeText, isDarkMode ? styles.darkText : styles.lightText]}>
-      Welcome to Santhoshi's Portfolio
-    </Text>
-    <TouchableOpacity
-      style={styles.button}
-      onPress={() => navigation.navigate('Details')}
-    >
-      <Text style={styles.buttonText}>Click to Know More</Text>
-    </TouchableOpacity>
-    {/* Bulb icon to toggle theme */}
-    <TouchableOpacity style={styles.themeButton} onPress={toggleTheme}>
-      <Image 
-        source={require('./assets/bulb-icon.png')} 
-        style={styles.bulbIcon} 
-      />
-      <Text style={[styles.themeText, { color: '#3498db' }]}>
-        Click here to change mode
-      </Text>
-    </TouchableOpacity>
-  </SafeAreaView>
-);
+import Projects from './Projects';
+import Certifications from './Certifications';
+import Interests from './Interests';
+import Contact from './Contact';
+import AboutMe from './AboutMe'; // Ensure this import is correct
+import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
+import Reanimated from 'react-native-reanimated'; // Renamed import from react-native-reanimated
 
-// Screen 2: Details Screen with list of cards
-const DetailsScreen = ({ navigation, isDarkMode }) => (
-  <SafeAreaView style={[styles.container, isDarkMode ? styles.darkContainer : styles.lightContainer]}>
-    <TouchableOpacity
-      style={[styles.card, isDarkMode ? styles.darkCard : styles.lightCard]} 
-      onPress={() => navigation.navigate('AboutMe', { isDarkMode })}
-    >
-      <Text style={[styles.cardText, isDarkMode ? styles.darkText : styles.lightText]}>About Me</Text>
-    </TouchableOpacity>
-    <View style={styles.card}>
-      <Text style={styles.cardText}>Education</Text>
-    </View>
-    <View style={styles.card}>
-      <Text style={styles.cardText}>Skills</Text>
-    </View>
-    <View style={styles.card}>
-      <Text style={styles.cardText}>Work Experience</Text>
-    </View>
-    <View style={styles.card}>
-      <Text style={styles.cardText}>Projects</Text>
-    </View>
-    <View style={styles.card}>
-      <Text style={styles.cardText}>Certifications</Text>
-    </View>
-    <View style={styles.card}>
-      <Text style={styles.cardText}>Interests</Text>
-    </View>
-    <View style={styles.card}>
-      <Text style={styles.cardText}>Contact Information</Text>
-    </View>
-  </SafeAreaView>
-);
+const Stack = createNativeStackNavigator();
 
-const Stack = createStackNavigator();
+const Home = ({ navigation, isDarkMode, toggleTheme }) => {
+  const cardData = [
+    { title: 'About Me', screen: 'AboutMe' },
+    { title: 'Projects', screen: 'Projects' },
+    { title: 'Certifications', screen: 'Certifications' },
+    { title: 'Interests', screen: 'Interests' },
+    { title: 'Contact', screen: 'Contact' },
+  ];
 
-export default function App() {
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [scale, setScale] = useState(new Animated.Value(1));
+  const [text, setText] = useState('');
+  const fullText = "Welcome to Santhoshi's Portfolio";  // Updated text
+  const [isTypingDone, setIsTypingDone] = useState(false); // To track whether typing animation has finished
 
-  const toggleTheme = () => {
-    setIsDarkMode(prevState => !prevState);
+  // Typewriter animation for text
+  useEffect(() => {
+    let index = 0;
+
+    const interval = setInterval(() => {
+      setText(prev => {
+        if (index < fullText.length) {
+          index += 1;
+          return prev + fullText[index - 1]; // Add one character at a time
+        }
+        return prev; // Don't update text once all characters are typed
+      });
+      
+      if (index === fullText.length) {
+        clearInterval(interval);
+        setIsTypingDone(true); // Mark typing as done once the text is fully displayed
+      }
+    }, 150);  // Adjust the speed of the typing effect by changing the interval
+
+    return () => clearInterval(interval); // Cleanup interval on component unmount
+  }, []); // Empty dependency array ensures this runs once on mount
+
+  const handlePressIn = () => {
+    Animated.spring(scale, {
+      toValue: 1.05,
+      friction: 3,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scale, {
+      toValue: 1,
+      friction: 3,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const renderCard = (item, index) => {
+    return (
+      <Swipeable key={index} friction={2} overshootLeft={false}>
+        <Animated.View
+          style={[
+            styles.card,
+            {
+              backgroundColor: isDarkMode ? '#333' : '#fff',
+              transform: [{ scale }],
+            },
+          ]}
+        >
+          <TouchableOpacity
+            onPressIn={handlePressIn}
+            onPressOut={handlePressOut}
+            onPress={() => navigation.navigate(item.screen, { isDarkMode })}
+          >
+            <Text style={[styles.cardText, { color: isDarkMode ? '#fff' : '#000' }]}>
+              {item.title}
+            </Text>
+          </TouchableOpacity>
+        </Animated.View>
+      </Swipeable>
+    );
   };
 
   return (
+    <SafeAreaView style={[styles.container, { backgroundColor: isDarkMode ? '#000' : '#f7f7f7' }]}>
+      {/* Animated Welcome Text */}
+      <View style={styles.welcomeContainer}>
+        <Text style={[styles.welcomeText, { color: isDarkMode ? '#fff' : '#000' }]}>
+          {text} {/* This is where the typing animation will show up */}
+        </Text>
+      </View>
+
+      {/* Theme Toggle */}
+      <View style={styles.switchRow}>
+        <Text style={{ color: isDarkMode ? '#fff' : '#000', fontSize: 16 }}>
+          {isDarkMode ? 'Dark Mode' : 'Light Mode'}
+        </Text>
+        <Switch value={isDarkMode} onValueChange={toggleTheme} />
+      </View>
+
+      {/* Swipeable Cards */}
+      <GestureHandlerRootView>
+        <ScrollView contentContainerStyle={styles.scrollViewContent}>
+          {cardData.map((item, index) => renderCard(item, index))}
+        </ScrollView>
+      </GestureHandlerRootView>
+    </SafeAreaView>
+  );
+};
+
+export default function App() {
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const toggleTheme = () => setIsDarkMode(!isDarkMode);
+
+  return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Welcome">
-        <Stack.Screen 
-          name="Welcome" 
-          component={(props) => <WelcomeScreen {...props} toggleTheme={toggleTheme} isDarkMode={isDarkMode} />} 
-        />
-        <Stack.Screen 
-          name="Details" 
-          component={(props) => <DetailsScreen {...props} isDarkMode={isDarkMode} />} 
-        />
-        <Stack.Screen name="AboutMe" component={AboutMeScreen} />
+      <Stack.Navigator initialRouteName="Home">
+        <Stack.Screen name="Home" options={{ headerShown: false }}>
+          {props => <Home {...props} isDarkMode={isDarkMode} toggleTheme={toggleTheme} />}
+        </Stack.Screen>
+        <Stack.Screen name="AboutMe">
+          {props => <AboutMe {...props} />}
+        </Stack.Screen>
+        <Stack.Screen name="Projects">
+          {props => <Projects {...props} />}
+        </Stack.Screen>
+        <Stack.Screen name="Certifications">
+          {props => <Certifications {...props} />}
+        </Stack.Screen>
+        <Stack.Screen name="Interests">
+          {props => <Interests {...props} />}
+        </Stack.Screen>
+        <Stack.Screen name="Contact">
+          {props => <Contact {...props} />}
+        </Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -91,58 +160,49 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    padding: 16,
+  },
+  welcomeContainer: {
     alignItems: 'center',
-  },
-  lightContainer: {
-    backgroundColor: '#f7f7f7',
-  },
-  darkContainer: {
-    backgroundColor: '#333',
+    marginVertical: 30,
   },
   welcomeText: {
-    fontSize: 24,
+    fontSize: 36,
     fontWeight: 'bold',
-    marginBottom: 20,
+    textAlign: 'center',
+    color: '#5D5C61', // Slightly soft color for the text
+    textShadowColor: 'rgba(0, 0, 0, 0.3)', // Adds a subtle shadow to the text
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 4,
+    letterSpacing: 2,
+    fontFamily: 'Arial', // Or any custom font you'd like to use
   },
-  lightText: {
-    color: '#000',
-  },
-  darkText: {
-    color: '#fff',
-  },
-  button: {
-    backgroundColor: '#3498db',
-    padding: 10,
-    borderRadius: 5,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 18,
-  },
-  card: {
-    backgroundColor: '#fff',
-    width: '80%',
-    padding: 20,
-    margin: 10,
-    borderRadius: 10,
-    elevation: 5, // adds shadow for Android
-    shadowColor: '#000', // adds shadow for iOS
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  cardText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  themeButton: {
-    marginTop: 20,
+  switchRow: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
     alignItems: 'center',
   },
-  bulbIcon: {
-    width: 30,
-    height: 30,
-    marginRight: 10,
+  scrollViewContent: {
+    paddingBottom: 30, // Adds spacing at the bottom of the ScrollView
+  },
+  card: {
+    borderRadius: 15,
+    padding: 30,
+    marginBottom: 20,
+    backgroundColor: '#fff',
+    elevation: 8, // 3D shadow for Android
+    shadowColor: '#000', // Shadow for iOS
+    shadowOpacity: 0.1,
+    shadowRadius: 15,
+    transform: [{ translateY: 8 }],
+    transition: 'all 0.3s ease-in-out',
+    marginHorizontal: 20,
+  },
+  cardText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    paddingVertical: 10,
   },
 });
