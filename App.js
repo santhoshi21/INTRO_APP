@@ -27,7 +27,7 @@ const Home = ({ navigation, isDarkMode, toggleTheme }) => {
     { title: 'About Me', screen: 'AboutMe' },
     { title: 'Projects', screen: 'Projects' },
     { title: 'Work Experience', screen: 'Certifications' },
-    { title: 'Certifications', screen: 'Interests' },
+    { title: 'Certif', screen: 'Interests' },
     { title: 'Contact', screen: 'Contact' },
   ];
 
@@ -145,8 +145,9 @@ export default function App() {
           {props => <AboutMe {...props} />}
         </Stack.Screen>
         <Stack.Screen name="Projects">
-          {props => <Projects {...props} />}
-        </Stack.Screen>
+  {props => <Projects {...props} isDarkMode={isDarkMode} />}
+</Stack.Screen>
+
         <Stack.Screen name="Certifications">
           {props => <Certifications {...props} />}
         </Stack.Screen>
