@@ -141,8 +141,9 @@ export default function App() {
           {props => <AboutMe {...props} />}
         </Stack.Screen>
         <Stack.Screen name="Projects">
-          {props => <Projects {...props} />}
-        </Stack.Screen>
+  {props => <Projects {...props} isDarkMode={isDarkMode} />}
+</Stack.Screen>
+
         <Stack.Screen name="Certifications">
           {props => <Certifications {...props} />}
         </Stack.Screen>
